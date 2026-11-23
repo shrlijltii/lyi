@@ -1,3 +1,4 @@
+
 /* =========================
    ELY'S LITTLE UNIVERSE
    JAVASCRIPT
@@ -8,37 +9,38 @@
 const menuToggle = document.getElementById("menuToggle");
 const navMenu = document.getElementById("navMenu");
 
-menuToggle.addEventListener("click", () => {
-  navMenu.classList.toggle("active");
-
-  menuToggle.textContent =
-    navMenu.classList.contains("active") ? "✕" : "☰";
-});
-
-// CLOSE MENU AFTER CLICK
-
-document.querySelectorAll("#navMenu a").forEach(link => {
-  link.addEventListener("click", () => {
-    navMenu.classList.remove("active");
-    menuToggle.textContent = "☰";
+if (menuToggle && navMenu) {
+  menuToggle.addEventListener("click", () => {
+    navMenu.classList.toggle("active");
+    menuToggle.textContent =
+      navMenu.classList.contains("active") ? "✕" : "☰";
   });
-});
+
+  document.querySelectorAll("#navMenu a").forEach(link => {
+    link.addEventListener("click", () => {
+      navMenu.classList.remove("active");
+      menuToggle.textContent = "☰";
+    });
+  });
+}
+
 
 // FOOTER YEAR
 
-document.getElementById("year").textContent =
-  new Date().getFullYear();
+const yearElement = document.getElementById("year");
+
+if (yearElement) {
+  yearElement.textContent = new Date().getFullYear();
+}
 
 
 // =========================
 // MUSIC PLAYER
 // =========================
 
-// TAMBAHKAN LAGU KAMU DI BAGIAN INI
-
 const songs = [
   {
-    title: "Drop dead",
+    title: "Drop Dead",
     artist: "Olivia Rodrigo",
     file: "song1.mp3"
   },
@@ -48,13 +50,13 @@ const songs = [
     file: "song2.mp3"
   },
   {
-    title: "Born to die",
-    artist: "Lana del rey",
+    title: "Born to Die",
+    artist: "Lana Del Rey",
     file: "song3.mp3"
   },
   {
     title: "Cinnamon Girl",
-    artist: "Lana del rey",
+    artist: "Lana Del Rey",
     file: "song4.mp3"
   }
 ];
@@ -74,9 +76,12 @@ const duration = document.getElementById("duration");
 
 let currentSong = 0;
 
-// DISPLAY SONG LIST
+
+// DISPLAY SONGS
 
 function displaySongs() {
+  if (!songList) return;
+
   songList.innerHTML = "";
 
   songs.forEach((song, index) => {
@@ -102,17 +107,25 @@ function displaySongs() {
   });
 }
 
+
 // LOAD SONG
 
 function loadSong(autoPlay = false) {
+  if (!audio) return;
+
   const song = songs[currentSong];
 
+  audio.pause();
   audio.src = song.file;
+  audio.load();
 
-  songTitle.textContent = song.title;
-  songArtist.textContent = song.artist;
+  if (songTitle) songTitle.textContent = song.title;
+  if (songArtist) songArtist.textContent = song.artist;
 
-  playBtn.textContent = "▶";
+  if (playBtn) playBtn.textContent = "▶";
+  if (progressBar) progressBar.value = 0;
+  if (currentTime) currentTime.textContent = "0:00";
+  if (duration) duration.textContent = "0:00";
 
   displaySongs();
 
@@ -121,56 +134,68 @@ function loadSong(autoPlay = false) {
   }
 }
 
+
 // PLAY MUSIC
 
-function playMusic() {
-  if (!audio.src) {
-    loadSong();
-  }
+async function playMusic() {
+  if (!audio) return;
 
-  audio.play()
-    .then(() => {
-      playBtn.textContent = "❚❚";
-    })
-    .catch(() => {
-      playBtn.textContent = "▶";
-      alert("Musik belum bisa diputar. Periksa file MP3 kamu ya!");
-    });
+  try {
+    await audio.play();
+    if (playBtn) playBtn.textContent = "Ⅱ";
+  } catch (error) {
+    console.error("Music error:", error);
+    if (playBtn) playBtn.textContent = "▶";
+    alert("Musik gagal diputar. Periksa file MP3!");
+  }
 }
 
-// PAUSE / PLAY BUTTON
 
-playBtn.addEventListener("click", () => {
-  if (audio.paused) {
-    playMusic();
-  } else {
-    audio.pause();
-    playBtn.textContent = "▶";
-  }
-});
+// PLAY / PAUSE
+
+if (playBtn && audio) {
+  playBtn.addEventListener("click", () => {
+    if (audio.paused) {
+      playMusic();
+    } else {
+      audio.pause();
+      playBtn.textContent = "▶";
+    }
+  });
+}
+
 
 // NEXT SONG
 
-nextBtn.addEventListener("click", () => {
-  currentSong = (currentSong + 1) % songs.length;
-  loadSong(true);
-});
+if (nextBtn) {
+  nextBtn.addEventListener("click", () => {
+    currentSong = (currentSong + 1) % songs.length;
+    loadSong(true);
+  });
+}
+
 
 // PREVIOUS SONG
 
-prevBtn.addEventListener("click", () => {
-  currentSong =
-    (currentSong - 1 + songs.length) % songs.length;
+if (prevBtn) {
+  prevBtn.addEventListener("click", () => {
+    currentSong =
+      (currentSong - 1 + songs.length) % songs.length;
 
-  loadSong(true);
-});
+    loadSong(true);
+  });
+}
 
-// AUTO NEXT SONG
 
-audio.addEventListener("ended", () => {
-  currentSong = (currentSong + 1) % songs.length;
-  loadSong(true);
-});
+// AUTO NEXT
+
+if (audio) {
+  audio.addEventListener("ended", () => {
+    currentSong = (currentSong + 1) % songs.length;
+    loadSong(true);
+  });
+}
+
 
 // TIME FORMAT
 
@@ -183,33 +208,52 @@ function formatTime(seconds) {
   return minutes + ":" + String(remaining).padStart(2, "0");
 }
 
+
 // UPDATE PROGRESS
 
-audio.addEventListener("timeupdate", () => {
-  if (audio.duration) {
-    progressBar.value =
-      (audio.currentTime / audio.duration) * 100;
+if (audio) {
+  audio.addEventListener("timeupdate", () => {
+    if (audio.duration) {
+      if (progressBar) {
+        progressBar.value =
+          (audio.currentTime / audio.duration) * 100;
+      }
 
-    currentTime.textContent =
-      formatTime(audio.currentTime);
+      if (currentTime) {
+        currentTime.textContent = formatTime(audio.currentTime);
+      }
+    }
+  });
 
-    duration.textContent =
-      formatTime(audio.duration);
-  }
-});
+  audio.addEventListener("loadedmetadata", () => {
+    if (duration) {
+      duration.textContent = formatTime(audio.duration);
+    }
+  });
+
+  audio.addEventListener("play", () => {
+    if (playBtn) playBtn.textContent = "Ⅱ";
+  });
+
+  audio.addEventListener("pause", () => {
+    if (playBtn) playBtn.textContent = "▶";
+  });
+}
+
 
 // SEEK MUSIC
 
-progressBar.addEventListener("input", () => {
-  if (audio.duration) {
-    audio.currentTime =
-      (progressBar.value / 100) * audio.duration;
-  }
-});
+if (progressBar && audio) {
+  progressBar.addEventListener("input", () => {
+    if (audio.duration) {
+      audio.currentTime =
+        (progressBar.value / 100) * audio.duration;
+    }
+  });
+}
 
-audio.addEventListener("loadedmetadata", () => {
-  duration.textContent = formatTime(audio.duration);
-});
+
+// INITIALIZE
 
 displaySongs();
 loadSong();
@@ -219,45 +263,39 @@ loadSong();
 // GUESTBOOK
 // =========================
 
-const sendMessage =
-  document.getElementById("sendMessage");
+const sendMessage = document.getElementById("sendMessage");
+const guestName = document.getElementById("guestName");
+const guestMessage = document.getElementById("guestMessage");
+const messageList = document.getElementById("messageList");
 
-const guestName =
-  document.getElementById("guestName");
+if (sendMessage && guestName && guestMessage && messageList) {
+  sendMessage.addEventListener("click", () => {
+    const name = guestName.value.trim();
+    const message = guestMessage.value.trim();
 
-const guestMessage =
-  document.getElementById("guestMessage");
+    if (!name || !message) {
+      alert("Isi nama dan pesan kamu dulu ya! ♡");
+      return;
+    }
 
-const messageList =
-  document.getElementById("messageList");
+    const card = document.createElement("div");
+    card.className = "guest-message";
 
-sendMessage.addEventListener("click", () => {
+    const author = document.createElement("strong");
+    author.textContent = "♡ " + name;
 
-  const name = guestName.value.trim();
-  const message = guestMessage.value.trim();
+    const content = document.createElement("p");
+    content.textContent = message;
 
-  if (!name || !message) {
-    alert("Isi nama dan pesan kamu dulu ya! ♡");
-    return;
-  }
+    card.append(author, content);
+    messageList.prepend(card);
 
-  const card = document.createElement("div");
-  card.className = "guest-message";
+    guestName.value = "";
+    guestMessage.value = "";
 
-  const author = document.createElement("strong");
-  author.textContent = "♡ " + name;
-
-  const content = document.createElement("p");
-  content.textContent = message;
-
-  card.append(author, content);
-  messageList.prepend(card);
-
-  guestName.value = "";
-  guestMessage.value = "";
-
-  alert("Your message has been added! Thank you ♡");
-});
+    alert("Your message has been added! Thank you ♡");
+  });
+}
 
 
 // =========================
@@ -266,17 +304,19 @@ sendMessage.addEventListener("click", () => {
 
 const backTop = document.getElementById("backTop");
 
-window.addEventListener("scroll", () => {
-  if (window.scrollY > 400) {
-    backTop.classList.add("show");
-  } else {
-    backTop.classList.remove("show");
-  }
-});
-
-backTop.addEventListener("click", () => {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
+if (backTop) {
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 400) {
+      backTop.classList.add("show");
+    } else {
+      backTop.classList.remove("show");
+    }
   });
-});
+
+  backTop.addEventListener("click", () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  });
+}
