@@ -41,22 +41,22 @@ const songs = [
   {
     title: "Drop dead",
     artist: "Olivia Rodrigo",
-    file: "music/song1.mp3"
+    file: "song1.mp3"
   },
   {
     title: "About You",
     artist: "The 1975",
-    file: "music/song2.mp3"
+    file: "song2.mp3"
   },
   {
     title: "Born to die",
     artist: "Lana del rey",
-    file: "music/song3.mp3"
+    file: "song3.mp3"
   },
   {
     title: "Cinnamon Girl",
     artist: "Lana del rey",
-    file: "music/song4.mp3"
+    file: "song4.mp3"
   }
 ];
 
